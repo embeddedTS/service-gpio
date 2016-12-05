@@ -15,7 +15,7 @@ function TryWrite(path,str,success,failure) {
     }
 }
 
-function gpio_action(res) {
+function gpio_action(url,res) {
     if (url.length == 2) {
 	var dir=fs.readFileSync(path+"/direction", "utf8")
 	var data=Number(fs.readFileSync(path+"/value", "utf8"))
@@ -58,12 +58,12 @@ function gpio(req,res,next) {
     if (!fs.existsSync(path)) {
 	TryWrite(path+"/export",""+num,function() {
 	    if (!fs.existsSync(path)) return res.send("ERROR") // what happened?
-	    gpio_action(res)
+	    gpio_action(url,res)
 	}, function() {
 	    return res.send("ERROR") // bad GPIO number?
 	})
     } else {
-	gpio_action(res)
+	gpio_action(url,res)
     }
 }
 
