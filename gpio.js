@@ -4,7 +4,27 @@ var app = require("server")().app
 var endpoint = "/gpio/"
 
 function gpio(req,res,next) {
-    var url = req.path.split("/")
+    var num,val,url = req.path.split("/")
+    if (url.length == 2) { // GET /gpio/#
+	num=url[1]
+	res.send("HIGH")
+    } else if (url.length == 3) { // GET /gpio/#/VALUE
+	num=url[1]
+	val=url[2]
+	switch (val) {
+	case "INPUT":
+	    res("OK"); break
+	case "HIGH":
+	    res("OK"); break
+	case "LOW":
+	    res("OK"); break
+	default:
+	    res("ERROR"); break
+	}
+	
+    } else {
+	res.send("ERROR")
+    }
     console.log(url)
 }
 
