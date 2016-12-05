@@ -19,7 +19,7 @@ function gpio_action(path,url,res) {
     if (url.length == 2) {
 	var dir=fs.readFileSync(path+"/direction", "utf8")
 	var data=Number(fs.readFileSync(path+"/value", "utf8"))
-	if (dir == "out") {
+	if (dir.slice(0,3) == "out") {
 	    if (data) {
 		return res.send("HIGH")
 	    } else {
@@ -35,9 +35,9 @@ function gpio_action(path,url,res) {
     } else { // url.length == 3
 	var val=url[2],cmd
 	switch (val) {
-	case "INPUT": cmd="in"; break
-	case "HIGH": cmd="high"; break
-	case "LOW": cmd="low"; break
+	case "INPUT": cmd="in\n"; break
+	case "HIGH": cmd="high\n"; break
+	case "LOW": cmd="low\n"; break
 	default: return res("ERROR")
 	}
 	TryWrite(path+"/direction",cmd,function() {
@@ -56,7 +56,7 @@ function gpio(req,res,next) {
     if (num < 0) return res.send("ERROR")
     var path="/sys/class/gpio/gpio"+num
     if (!fs.existsSync(path)) {
-	TryWrite(path+"/export",""+num,function() {
+	TryWrite(path+"/export",""+num+"\n",function() {
 	    if (!fs.existsSync(path)) return res.send("ERROR") // what happened?
 	    gpio_action(path,url,res)
 	}, function() {
