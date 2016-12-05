@@ -1,0 +1,11 @@
+{
+  "name": "server-gpio",
+  "version": "1.0.0",
+  "description": "GPIO Service",
+  "main": "gpio.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michael Schmidt",
+  "license": "UNLICENSED"
+}
