@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "GPIO Service",
   "main": "gpio.js",
+  "dependencies": {
+      "server": "git+ssh://oz.embeddedarm.com/u/gitroot/node/server.git"
+  }
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
