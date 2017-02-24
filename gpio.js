@@ -54,7 +54,7 @@ function gpio(req,res,next) {
     if (num < 0) return res.send("ERROR")
     var path="/sys/class/gpio/gpio"+num
     if (!fs.existsSync(path)) {
-	TryWrite(path+"/export",""+num+"\n",function() {
+	TryWrite("/sys/class/gpio/export",""+num+"\n",function() {
 	    if (!fs.existsSync(path)) return res.send("ERROR") // what happened?
 	    gpio_action(path,url,res)
 	}, function() {
