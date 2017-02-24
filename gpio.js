@@ -19,15 +19,15 @@ function gpio_action(path,url,res) {
 	var data=Number(fs.readFileSync(path+"/value", "utf8"))
 	if (dir.slice(0,3) == "out") {
 	    if (data) {
-		return res.send("HIGH")
+		return res.write("\"HIGH\"")
 	    } else {
-		return res.send("LOW")
+		return res.write("\"LOW\"")
 	    }
 	} else { // dir == "in"
 	    if (data) {
-		return res.send("INPUT_HIGH")
+		return res.write("\"INPUT_HIGH\"")
 	    } else {
-		return res.send("INPUT_LOW")
+		return res.write("\"INPUT_LOW\"")
 	    }
 	}
     } else { // url.length == 3
@@ -36,33 +36,40 @@ function gpio_action(path,url,res) {
 	case "INPUT": cmd="in\n"; break
 	case "HIGH": cmd="high\n"; break
 	case "LOW": cmd="low\n"; break
-	default: return res("ERROR")
+	default: return res.write("\"ERROR\"")
 	}
 	TryWrite(path+"/direction",cmd,function() {
-	    return res.send("OK")
+	    return res.write("\"OK\"")
 	}, function() {
-	    return res.send("ERROR")
+	    return res.write("\"ERROR\"")
 	})
     }
 }
 
 function gpio(req,res,next) {
-    var num,val,url = req.path.split("/")
+    var i,num,val,url = req.path.split("/")
     console.log(req.path)
-    if (url.length < 2 || url.length > 3) return res.send("ERROR")
-    num=Number(url[1])
-    if (num < 0) return res.send("ERROR")
-    var path="/sys/class/gpio/gpio"+num
-    if (!fs.existsSync(path)) {
-	TryWrite("/sys/class/gpio/export",""+num+"\n",function() {
-	    if (!fs.existsSync(path)) return res.send("ERROR") // what happened?
+    if (url.length < 2 || url.length > 3) return res.write("[\"ERROR\"]")
+    var numlist = url[1].split(",")
+    res.write("[")
+    for (i=0;i<numlist.length;i++) {
+	num=Number(numlist[i])
+	if (i>0) res.write(",")
+	if (num < 0) return res.write("\"ERROR\"")
+	var path="/sys/class/gpio/gpio"+num
+	if (!fs.existsSync(path)) {
+	    TryWrite("/sys/class/gpio/export",""+num+"\n",function() {
+		if (!fs.existsSync(path)) return res.write("\"ERROR\"") // what happened?
+		gpio_action(path,url,res)
+	    }, function() {
+		return res.write("\"ERROR\"") // bad GPIO number?
+	    })
+	} else {
 	    gpio_action(path,url,res)
-	}, function() {
-	    return res.send("ERROR") // bad GPIO number?
-	})
-    } else {
-	gpio_action(path,url,res)
+	}
     }
+    res.write("]")
+    res.end()
 }
 
 /*
