@@ -1,8 +1,6 @@
 "use strict";
 
 var fs = require("fs")
-var app = require("server")().app
-var endpoint = "/gpio/"
 
 function TryWrite(path,str,success,failure) {
     try {
@@ -79,7 +77,9 @@ function gpio(req,res,next) {
     HIGH
     LOW
 */
-module.exports = function(options) {
+var endpoint = "/gpio/"
+
+module.exports = function(app,exports,options) {
     if (options && typeof options == "string") {
 	endpoint = options
     }
