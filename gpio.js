@@ -13,60 +13,82 @@ function TryWrite(path,str,success,failure) {
     }
 }
 
-function gpio_action(path,url,res) {
-    if (url.length == 2) {
-	var dir=fs.readFileSync(path+"/direction", "utf8")
-	var data=Number(fs.readFileSync(path+"/value", "utf8"))
-	if (dir.slice(0,3) == "out") {
-	    if (data) {
-		return res.write("\"HIGH\"")
-	    } else {
-		return res.write("\"LOW\"")
-	    }
-	} else { // dir == "in"
-	    if (data) {
-		return res.write("\"INPUT_HIGH\"")
-	    } else {
-		return res.write("\"INPUT_LOW\"")
-	    }
-	}
-    } else { // url.length == 3
-	var val=url[2],cmd
-	switch (val) {
-	case "INPUT": cmd="in\n"; break
-	case "HIGH": cmd="high\n"; break
-	case "LOW": cmd="low\n"; break
-	default: return res.write("\"ERROR\"")
-	}
-	TryWrite(path+"/direction",cmd,function() {
-	    return res.write("\"OK\"")
+// make sure that Linux has initialized the specified GPIO number "num"
+// returns true on success, or false on failure
+function gpio_init(num) {
+    if (!fs.existsSync(path)) {
+	TryWrite("/sys/class/gpio/export",""+num+"\n",function() {
+	    if (!fs.existsSync(path)) return false
+	    return true
 	}, function() {
-	    return res.write("\"ERROR\"")
+	    return false
 	})
     }
 }
 
+// set the specified GPIO number "num" to the given value "val", where
+// val = "INPUT", "LOW", or "HIGH"
+// returns "OK" or "ERROR"
+function gpio_set(num,val) {
+    var path="/sys/class/gpio/gpio"+num
+    if (!gpio_init(num)) return "ERROR"
+    var cmd
+    switch (val) {
+    case "INPUT": cmd="in\n"; break
+    case "HIGH": cmd="high\n"; break
+    case "LOW": cmd="low\n"; break
+    default: return "ERROR")
+    }
+    TryWrite(path+"/direction",cmd,function() {
+	return "OK"
+    }, function() {
+	return "ERROR"
+    })
+}
+
+// get the value of the specified GPIO number "num"
+// returns "LOW", "HIGH", "INPUT_LOW", or "INPUT_HIGH"
+// may also return "ERROR"
+function gpio_get(num) {
+    var path="/sys/class/gpio/gpio"+num
+    if (!gpio_init(num)) return "ERROR"
+    var dir=fs.readFileSync(path+"/direction", "utf8")
+    var data=Number(fs.readFileSync(path+"/value", "utf8"))
+    if (dir.slice(0,3) == "out") {
+	if (data) {
+	    return "HIGH"
+	} else {
+	    return "LOW"
+	}
+    } else { // dir == "in"
+	if (data) {
+	    return "INPUT_HIGH"
+	} else {
+	    return "INPUT_LOW"
+	}
+    }
+}
+
 function gpio(req,res,next) {
-    var i,num,val,url = req.path.split("/")
+    var i,num,val,ret,url = req.path.split("/")
     console.log(req.path)
-    if (url.length < 2 || url.length > 3) return res.write("[\"ERROR\"]")
+    if (url.length < 2 || url.length > 3) {
+	res.write("[\"ERROR\"]")
+	return
+    }
     var numlist = url[1].split(",")
     res.write("[")
     for (i=0;i<numlist.length;i++) {
-	num=Number(numlist[i])
 	if (i>0) res.write(",")
-	if (num < 0) return res.write("\"ERROR\"")
-	var path="/sys/class/gpio/gpio"+num
-	if (!fs.existsSync(path)) {
-	    TryWrite("/sys/class/gpio/export",""+num+"\n",function() {
-		if (!fs.existsSync(path)) return res.write("\"ERROR\"") // what happened?
-		gpio_action(path,url,res)
-	    }, function() {
-		return res.write("\"ERROR\"") // bad GPIO number?
-	    })
-	} else {
-	    gpio_action(path,url,res)
+	num=Number(numlist[i])
+	if (num < 0) res.write("\"ERROR\"")
+	if (url.length == 2) {
+	    ret = gpio_get(num)
+	} else { // url.length == 3
+	    val = url[2]
+	    ret = gpio_set(num,val)
 	}
+	res.write(ret)
     }
     res.write("]")
     res.end()
@@ -92,5 +114,4 @@ module.exports = function(app,exports,options) {
     }
     Log("service gpio ",endpoint)
     app.use(endpoint, gpio)
-    
 }
