@@ -1,6 +1,6 @@
 {
   "name": "service-gpio",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generic Linux GPIO plug-in for express-modular-server",
   "main": "gpio.js",
   "dependencies": {
@@ -8,6 +8,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+	"type": "git",
+	"url": "git+ssh://git@github.com/embeddedarm/service-gpio.git"
+    },
+  "bugs": {
+	"url": "https://github.com/embeddedarm/service-gpio/issues"
+  },
+  "homepage": "https://github.com/embeddedarm/service-gpio#readme",
   "author": "Michael Schmidt",
   "license": "UNLICENSED"
 }
