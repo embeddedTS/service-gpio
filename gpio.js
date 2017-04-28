@@ -15,7 +15,7 @@ function TryWrite(path,str,success,failure) {
 
 // make sure that Linux has initialized the specified GPIO number "num"
 // returns true on success, or false on failure
-function gpio_init(num) {
+function gpio_init(path,num) {
     if (!fs.existsSync(path)) {
 	TryWrite("/sys/class/gpio/export",""+num+"\n",function() {
 	    if (!fs.existsSync(path)) return false
@@ -31,7 +31,7 @@ function gpio_init(num) {
 // returns "OK" or "ERROR"
 function gpio_set(num,val) {
     var path="/sys/class/gpio/gpio"+num
-    if (!gpio_init(num)) return "ERROR"
+    if (!gpio_init(path,num)) return "ERROR"
     var cmd
     switch (val) {
     case "INPUT": cmd="in\n"; break
@@ -51,7 +51,7 @@ function gpio_set(num,val) {
 // may also return "ERROR"
 function gpio_get(num) {
     var path="/sys/class/gpio/gpio"+num
-    if (!gpio_init(num)) return "ERROR"
+    if (!gpio_init(path,num)) return "ERROR"
     var dir=fs.readFileSync(path+"/direction", "utf8")
     var data=Number(fs.readFileSync(path+"/value", "utf8"))
     if (dir.slice(0,3) == "out") {
