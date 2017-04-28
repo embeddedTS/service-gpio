@@ -2,28 +2,29 @@
 
 var fs = require("fs")
 
-function TryWrite(path,str,success,failure) {
+function TryWrite(path,str) {
     try {
-	var out=fs.createWriteStream(path)
-	out.on("finish",success)
-	out.write(str)
-	out.end()
+        fs.writeFileSync(path,str)
     } catch (e) {
-	if (failure) failure(e)
+        return false
     }
+    return true
 }
 
 // make sure that Linux has initialized the specified GPIO number "num"
 // returns true on success, or false on failure
 function gpio_init(path,num) {
     if (!fs.existsSync(path)) {
-	TryWrite("/sys/class/gpio/export",""+num+"\n",function() {
-	    if (!fs.existsSync(path)) return false
-	    return true
-	}, function() {
-	    return false
-	})
-    }
+        if (TryWrite("/sys/class/gpio/export",""+num+"\n")) {
+            if (!fs.existsSync(path)) {
+                console.log("error:",num,":",path)
+                return false
+            }
+            return true
+        } else {
+            return false
+        }
+    } else return true
 }
 
 // set the specified GPIO number "num" to the given value "val", where
@@ -31,7 +32,8 @@ function gpio_init(path,num) {
 // returns "OK" or "ERROR"
 function gpio_set(num,val) {
     var path="/sys/class/gpio/gpio"+num
-    if (!gpio_init(path,num)) return "ERROR"
+    gpio_init(path,num,function(ok) {
+	if (!ok)
     var cmd
     switch (val) {
     case "INPUT": cmd="in\n"; break
@@ -39,11 +41,12 @@ function gpio_set(num,val) {
     case "LOW": cmd="low\n"; break
     default: return "ERROR"
     }
-    TryWrite(path+"/direction",cmd,function() {
-	return "OK"
-    }, function() {
-	return "ERROR"
-    })
+    if (TryWrite(path+"/direction",cmd)) {
+        return "OK"
+    } else {
+        console.log("error6")
+        return "ERROR"
+    }
 }
 
 // get the value of the specified GPIO number "num"
@@ -88,7 +91,7 @@ function gpio(req,res,next) {
 	    val = url[2]
 	    ret = gpio_set(num,val)
 	}
-	res.write(ret)
+	res.write(JSON.stringify(ret))
     }
     res.write("]")
     res.end()
