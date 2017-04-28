@@ -37,7 +37,7 @@ function gpio_set(num,val) {
     case "INPUT": cmd="in\n"; break
     case "HIGH": cmd="high\n"; break
     case "LOW": cmd="low\n"; break
-    default: return "ERROR")
+    default: return "ERROR"
     }
     TryWrite(path+"/direction",cmd,function() {
 	return "OK"

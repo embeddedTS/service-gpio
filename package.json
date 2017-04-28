@@ -1,6 +1,6 @@
 {
   "name": "service-gpio",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Generic Linux GPIO plug-in for express-modular-server",
   "main": "gpio.js",
   "dependencies": {
