@@ -10,12 +10,12 @@
   },
   "repository": {
 	"type": "git",
-	"url": "git+ssh://git@github.com/embeddedarm/service-gpio.git"
+	"url": "git+ssh://git@github.com/embeddedTS/service-gpio.git"
     },
   "bugs": {
-	"url": "https://github.com/embeddedarm/service-gpio/issues"
+	"url": "https://github.com/embeddedTS/service-gpio/issues"
   },
-  "homepage": "https://github.com/embeddedarm/service-gpio#readme",
+  "homepage": "https://github.com/embeddedTS/service-gpio#readme",
   "author": "Michael Schmidt",
   "license": "GPL 3.0"
 }

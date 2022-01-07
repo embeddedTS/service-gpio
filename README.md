@@ -9,7 +9,7 @@ If a string option is presented upon initialization, it is the base endpoint to 
 
     npm install service-gpio
 
-The device you are running on must have kernel support for the sysfs GPIO interface including actual GPIOs which can be controlled.  This code has been tested on a Technologic Systems [TS-7680](https://wiki.embeddedarm.com/wiki/TS-7680). 
+The device you are running on must have kernel support for the sysfs GPIO interface including actual GPIOs which can be controlled.  This code has been tested on a embeddedTS [TS-7680](https://wiki.embeddedTS.com/wiki/TS-7680). 
 
 # Usage
 
